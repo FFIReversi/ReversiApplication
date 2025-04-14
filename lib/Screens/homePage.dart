@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'boardPage.dart';
 
 class Homepage extends StatelessWidget {
@@ -22,13 +23,12 @@ class Homepage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const BoardPage(choose: 0),
+                    builder: (context) => BoardPage(gameMode: 0),
                   ),
                 );
               },
               child: const Text('Start Game'),
             ),
-
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -36,36 +36,33 @@ class Homepage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const BoardPage(choose: 1),
+                    builder: (context) => BoardPage(gameMode: 1),
                   ),
                 );
               },
               child: const Text('Start Game vs AI level 1'),
             ),
-
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: () {
                 // Navigate to the game page
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const BoardPage(choose: 2),
+                    builder: (context) => BoardPage(gameMode: 2),
                   ),
                 );
               },
               child: const Text('Start Game vs AI level 2'),
             ),
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: () {
                 // Navigate to the game page
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const BoardPage(choose: 3),
+                    builder: (context) => BoardPage(gameMode: 3),
                   ),
                 );
               },
@@ -84,13 +81,6 @@ class Homepage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to the settings page
-          Navigator.pushNamed(context, '/settings');
-        },
-        child: const Icon(Icons.settings),
       ),
     );
   }

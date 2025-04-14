@@ -1,19 +1,20 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'reversi.dart';
 
-class BoardPage extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:reversi/reversi.dart';
+
+class _Board extends StatefulWidget {
   final int choose;
 
-  const BoardPage({super.key, required this.choose});
+  const _Board({super.key, required this.choose});
 
   @override
-  State<BoardPage> createState() => _BoardPageState();
+  State<_Board> createState() => __BoardState();
 }
 
-class _BoardPageState extends State<BoardPage> {
+class __BoardState extends State<_Board> {
   // 棋盘数据 0: 空位, 1: 黑棋, 2: 白棋
-  List<int> _board = List.filled(64, 0);
+  List<int> _Board = List.filled(64, 0);
   List<int> preview = List.filled(64, 0);
   List<int> move_recode = [];
   List<int> player_recode = [];
@@ -30,10 +31,10 @@ class _BoardPageState extends State<BoardPage> {
   void initState() {
     super.initState();
     choose = widget.choose;
-    _board[27] = 1;
-    _board[28] = 2;
-    _board[35] = 2;
-    _board[36] = 1;
+    _Board[27] = 1;
+    _Board[28] = 2;
+    _Board[35] = 2;
+    _Board[36] = 1;
 
     Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
@@ -60,7 +61,7 @@ class _BoardPageState extends State<BoardPage> {
     // 可落子位置顯示
     if (getMovableArray(
       _currentPlayer % 2 + 1,
-      _board,
+      _Board,
     ).any((point) => point.y == value % 8 && point.x == value ~/ 8)) {
       return Icon(
         Icons.circle,
@@ -69,11 +70,11 @@ class _BoardPageState extends State<BoardPage> {
       );
     }
     // 黑棋顯示
-    else if (_board[value] == 1) {
+    else if (_Board[value] == 1) {
       return Icon(Icons.circle, color: Colors.black, size: 40);
     }
     // 白棋顯示
-    else if (_board[value] == 2) {
+    else if (_Board[value] == 2) {
       return Icon(Icons.circle, color: Colors.white, size: 40);
     }
     // 空位顯示
@@ -90,10 +91,9 @@ class _BoardPageState extends State<BoardPage> {
 
       // 设置标题栏
       appBar: AppBar(
-        title:
-            _currentPlayer % 2 == 0
-                ? Text('Reversi\tnow Player: 黑色')
-                : Text('Reversi\tnow Player: 白色'),
+        title: _currentPlayer % 2 == 0
+            ? Text('Reversi\tnow Player: 黑色')
+            : Text('Reversi\tnow Player: 白色'),
       ),
 
       body: Row(
@@ -114,46 +114,41 @@ class _BoardPageState extends State<BoardPage> {
                     int col = index ~/ 8;
 
                     return MouseRegion(
-                      onEnter:
-                          (event) => setState(() {
-                            Coordinates dropPoint =
-                                Coordinates()
-                                  ..y = index ~/ 8
-                                  ..x = index % 8;
-                            List<int> tempBoard = makeMove(
-                              _currentPlayer % 2 + 1,
-                              _board,
-                              dropPoint,
-                            );
-                            preview = List.generate(
-                              tempBoard.length,
-                              (index) => tempBoard[index] - _board[index],
-                            );
-                            for (int i = 0; i < preview.length; i++)
-                              if (_board[i] != 0 && preview[i] != 0)
-                                preview[i] = 3;
-                            // 鼠标悬停时的处理逻辑
-                          }),
-                      onExit:
-                          (event) => setState(() {
-                            // 鼠标离开时的处理逻辑
-                            preview = List.filled(64, 0);
-                          }),
+                      onEnter: (event) => setState(() {
+                        Coordinates dropPoint = Coordinates()
+                          ..y = index ~/ 8
+                          ..x = index % 8;
+                        List<int> temp_Board = makeMove(
+                          _currentPlayer % 2 + 1,
+                          _Board,
+                          dropPoint,
+                        );
+                        preview = List.generate(
+                          temp_Board.length,
+                          (index) => temp_Board[index] - _Board[index],
+                        );
+                        for (int i = 0; i < preview.length; i++)
+                          if (_Board[i] != 0 && preview[i] != 0) preview[i] = 3;
+                        // 鼠标悬停时的处理逻辑
+                      }),
+                      onExit: (event) => setState(() {
+                        // 鼠标离开时的处理逻辑
+                        preview = List.filled(64, 0);
+                      }),
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
                             time = 0;
                             preview = List.filled(64, 0);
                             // 计算点击的行和列
-                            Coordinates dropPoint =
-                                Coordinates()
-                                  ..y = index ~/ 8
-                                  ..x = index % 8;
+                            Coordinates dropPoint = Coordinates()
+                              ..y = index ~/ 8
+                              ..x = index % 8;
 
                             // 獲取可落子位置
                             List<Coordinates> movablePoints = getMovableArray(
                               _currentPlayer % 2 + 1,
-                              _board,
+                              _Board,
                             );
 
                             // 如果没有可落子位置，切換玩家
@@ -168,9 +163,9 @@ class _BoardPageState extends State<BoardPage> {
                               if (choose == 0) {
                                 player_recode.add(_currentPlayer);
                                 move_recode.add(index);
-                                _board = makeMove(
+                                _Board = makeMove(
                                   _currentPlayer % 2 + 1,
-                                  _board,
+                                  _Board,
                                   dropPoint,
                                 );
                                 _currentPlayer++;
@@ -178,9 +173,9 @@ class _BoardPageState extends State<BoardPage> {
                                   _currentPlayer % 2 + 1 == 1) {
                                 player_recode.add(_currentPlayer);
                                 move_recode.add(index);
-                                _board = makeMove(
+                                _Board = makeMove(
                                   _currentPlayer % 2 + 1,
-                                  _board,
+                                  _Board,
                                   dropPoint,
                                 );
                                 _currentPlayer++;
@@ -188,32 +183,32 @@ class _BoardPageState extends State<BoardPage> {
                               ;
                             } else if (choose == 1 &&
                                 _currentPlayer % 2 + 1 == 2) {
-                              _board = aiRandom(_currentPlayer % 2 + 1, _board);
+                              _Board = aiRandom(_currentPlayer % 2 + 1, _Board);
                               _currentPlayer++;
                             } else if (choose == 2 &&
                                 _currentPlayer % 2 + 1 == 2) {
-                              _board = aiGreedy(_currentPlayer % 2 + 1, _board);
+                              _Board = aiGreedy(_currentPlayer % 2 + 1, _Board);
                               _currentPlayer++;
                             } else if (choose == 3 &&
                                 _currentPlayer % 2 + 1 == 2) {
-                              _board = aiGreedyAlphaBeta(
+                              _Board = aiGreedyAlphaBeta(
                                 _currentPlayer % 2 + 1,
-                                _board,
+                                _Board,
                               );
                               _currentPlayer++;
                             }
 
                             //檢查棋局使否結束
-                            if (_board.every((value) => value != 0) ||
-                                _board.every((value) => value != 1) ||
-                                _board.every((value) => value != 2) ||
-                                getMovableArray(1, _board).isEmpty &&
-                                    getMovableArray(2, _board).isEmpty) {
+                            if (_Board.every((value) => value != 0) ||
+                                _Board.every((value) => value != 1) ||
+                                _Board.every((value) => value != 2) ||
+                                getMovableArray(1, _Board).isEmpty &&
+                                    getMovableArray(2, _Board).isEmpty) {
                               // 计算黑棋和白棋的数量
                               int blackCount =
-                                  _board.where((value) => value == 1).length;
+                                  _Board.where((value) => value == 1).length;
                               int whiteCount =
-                                  _board.where((value) => value == 2).length;
+                                  _Board.where((value) => value == 2).length;
 
                               // 显示游戏结束对话框
                               showDialog(
@@ -221,17 +216,15 @@ class _BoardPageState extends State<BoardPage> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Game Over'),
-                                    content:
-                                        blackCount > whiteCount
+                                    content: blackCount > whiteCount
+                                        ? Text(
+                                            'Black wins!  black: $blackCount, white: $whiteCount',
+                                          )
+                                        : blackCount < whiteCount
                                             ? Text(
-                                              'Black wins!  black: $blackCount, white: $whiteCount',
-                                            )
-                                            : blackCount < whiteCount
-                                            ? Text(
-                                              'White wins!  black: $blackCount, white: $whiteCount',
-                                            )
+                                                'White wins!  black: $blackCount, white: $whiteCount',
+                                              )
                                             : const Text('Draw!'),
-
                                     actions: <Widget>[
                                       TextButton(
                                         child: const Text('OK'),
@@ -246,7 +239,6 @@ class _BoardPageState extends State<BoardPage> {
                             }
                           });
                         },
-
                         child: SizedBox(
                           height: 50,
                           child: Container(
@@ -257,24 +249,24 @@ class _BoardPageState extends State<BoardPage> {
                                 color: const Color.fromARGB(255, 0, 0, 0),
                                 width: 1,
                               ),
-                              borderRadius:
-                                  row == 0 && col == 0
+                              borderRadius: row == 0 && col == 0
+                                  ? BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                    )
+                                  : row == 0 && col == 7
                                       ? BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                      )
-                                      : row == 0 && col == 7
-                                      ? BorderRadius.only(
-                                        bottomLeft: Radius.circular(10),
-                                      )
+                                          bottomLeft: Radius.circular(10),
+                                        )
                                       : row == 7 && col == 0
-                                      ? BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                      )
-                                      : row == 7 && col == 7
-                                      ? BorderRadius.only(
-                                        bottomRight: Radius.circular(10),
-                                      )
-                                      : null,
+                                          ? BorderRadius.only(
+                                              topRight: Radius.circular(10),
+                                            )
+                                          : row == 7 && col == 7
+                                              ? BorderRadius.only(
+                                                  bottomRight:
+                                                      Radius.circular(10),
+                                                )
+                                              : null,
                             ),
 
                             //生成棋子
@@ -291,7 +283,6 @@ class _BoardPageState extends State<BoardPage> {
               ),
             ),
           ),
-
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -309,7 +300,6 @@ class _BoardPageState extends State<BoardPage> {
                   ),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(top: 100),
                 child: Text(
@@ -331,7 +321,7 @@ class _BoardPageState extends State<BoardPage> {
                     int x = value ~/ 8 + 1; // column
                     int player =
                         player_recode[move_recode.length - 1 - index] % 2 +
-                        1; // player
+                            1; // player
                     return Text(
                       '${player == 1 ? "black" : "white"}: ($y, $x)',
                       style: const TextStyle(fontSize: 20),
@@ -339,9 +329,7 @@ class _BoardPageState extends State<BoardPage> {
                   },
                 ),
               ),
-
               Expanded(child: Container()),
-
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
