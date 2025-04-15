@@ -1,6 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // Import for debugPrintSizesEnabled
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:reversi_application/Utils/database.dart';
+import 'package:reversi_application/Utils/game.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'Screens/homePage.dart';
@@ -17,13 +22,16 @@ void main() async {
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
+      // titleBarStyle: TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });
   }
+  await Hive.initFlutter();
+  Hive.registerAdapter(GameAdapter());
+  await Hive.openBox("Reversi");
   runApp(MyApp());
 }
 
@@ -38,7 +46,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Color(0xff004118),

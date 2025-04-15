@@ -1,268 +1,41 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:reversi/reversi.dart';
-import 'package:reversi_application/Utils/database.dart';
-import 'package:reversi_application/Widgets/board.dart';
 
-class BoardPage extends StatefulWidget {
-  var gameMode;
+import '../Utils/game.dart';
+import '../Widgets/board.dart';
+import 'boardPage.dart';
 
-  BoardPage({super.key, required this.gameMode});
+class PreviousBoardPage extends StatefulWidget {
+  Game info;
+
+  PreviousBoardPage({
+    super.key,
+    required this.info,
+  });
 
   @override
-  State<BoardPage> createState() => _BoardPageState();
+  State<PreviousBoardPage> createState() => _PreviousBoardPageState();
 }
 
-enum Player { none, black, white, possible, canBeFlipped }
-
-class _BoardPageState extends State<BoardPage> {
-  late var gameMode = widget.gameMode;
-  List<int> _chessBoard = List<int>.filled(64, 0);
+class _PreviousBoardPageState extends State<PreviousBoardPage> {
   int _nowPlayer = Player.black.index;
   bool _isGameEnd = false;
-  int _time = 60;
-  List<List<int>> _chessBoardHistory = [];
-  List<int> _playerHistory = [];
-
-  void _gameEnd() {
-    _playerHistory.add(_nowPlayer);
-    _isGameEnd = true;
-    setState(() {});
-  }
-
-  bool _listEquals(List<int> a, List<int> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-
-  void _saveGame() {
-    _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
-    _switchPlayer();
-
-    bool have = false;
-    for (int i = 0; i < _chessBoardHistory.length; i++) {
-      if (_listEquals(_chessBoardHistory[i], _playerHistory)) have = false;
-    }
-
-    if (!have) {
-      print(_chessBoardHistory.where((e) {
-        return e != 0;
-      }).length);
-      _playerHistory.add(_nowPlayer);
-      _chessBoardHistory.add(_chessBoard.toList());
-      // print(_nowPlayer);
-    }
-  }
-
-  void _switchPlayer() {
-    _time = 60;
-    if (_nowPlayer == Player.black.index) {
-      _nowPlayer = Player.white.index;
-    } else {
-      _nowPlayer = Player.black.index;
-    }
-  }
-
-  void _clearFlippedState() {
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 4) {
-        if (_nowPlayer == Player.black.index) {
-          _chessBoard[i] = Player.white.index;
-        } else {
-          _chessBoard[i] = Player.black.index;
-        }
-      }
-    }
-    setState(() {});
-  }
-
-  void _handleGameAfterAI() {
-    _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
-
-    var movable = getMovableArray(_nowPlayer, _chessBoard);
-    if (movable.isEmpty) {
-      _switchPlayer();
-      movable = getMovableArray(_nowPlayer, _chessBoard);
-      if (movable.isEmpty) {
-        _gameEnd();
-        return;
-      }
-      bool _isSameList = true;
-      if (gameMode == 1) {
-        _isSameList =
-            _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
-      } else if (gameMode == 2) {
-        _isSameList =
-            _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
-      } else if (gameMode == 3) {
-        _isSameList = _listEquals(
-            aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
-      } else {
-        for (var m in movable) {
-          _chessBoard[m.y * 8 + m.x] = 3;
-        }
-        return;
-      }
-      _handleGameAfterAI();
-      return;
-    } else {
-      for (var m in movable) {
-        _chessBoard[m.y * 8 + m.x] = 3;
-      }
-    }
-    setState(() {});
-  }
-
-  void _moveChess(int chessPosition) {
-    Coordinates dropPoint = Coordinates()
-      ..y = chessPosition ~/ 8
-      ..x = chessPosition % 8;
-
-    _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
-
-    _switchPlayer();
-    _chessBoard = makeMove(_nowPlayer, _chessBoard, dropPoint);
-    _saveGame();
-    _switchPlayer();
-    bool _isSameList = true;
-    if (gameMode == 1) {
-      _isSameList = _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
-    } else if (gameMode == 2) {
-      _isSameList = _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
-    } else if (gameMode == 3) {
-      _isSameList =
-          _listEquals(aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
-    } else {
-      var movable = getMovableArray(_nowPlayer, _chessBoard);
-      for (var m in movable) {
-        _chessBoard[m.y * 8 + m.x] = 3;
-      }
-      if (movable.isEmpty) {
-        _switchPlayer();
-        movable = getMovableArray(_nowPlayer, _chessBoard);
-        for (var m in movable) {
-          _chessBoard[m.y * 8 + m.x] = 3;
-        }
-        if (movable.isEmpty) {
-          _gameEnd();
-        }
-      }
-    }
-
-    setState(() {});
-  }
+  int _nowIndex = 0;
+  late var _chessBoardOfInfo = widget.info.chessBoard.toList();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    List<int> _chessBoard = List<int>.filled(64, 0);
+    _chessBoard = List<int>.filled(64, 0);
     _chessBoard[27] = 1;
     _chessBoard[28] = 2;
     _chessBoard[35] = 2;
     _chessBoard[36] = 1;
-    var blackMovable = getMovableArray(Player.black.index, _chessBoard);
-    for (var m in blackMovable) {
-      _chessBoard[m.y * 8 + m.x] = 3;
-    }
-    _playerHistory.clear();
-    _chessBoardHistory.clear();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted || _isGameEnd) return;
-      return setState(() {
-        _time--;
-        setState(() {});
-        if (_time <= 0) {
-          _switchPlayer();
-          for (int i = 0; i < _chessBoard.length; i++) {
-            if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-            if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-          }
-          _switchPlayer();
-          bool _isSameList = true;
-          _isSameList =
-              _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-          _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-          if (!_isSameList) {
-            _saveGame();
-          }
-          _switchPlayer();
-          if (gameMode == 1) {
-            _isSameList =
-                _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else if (gameMode == 2) {
-            _isSameList =
-                _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else if (gameMode == 3) {
-            _isSameList = _listEquals(
-                aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else {
-            _switchPlayer();
-            _handleGameAfterAI();
-          }
-          setState(() {});
-          _time = 60;
-        }
-      });
-    });
+    _chessBoardOfInfo.insert(0, _chessBoard);
+    print(_chessBoardOfInfo.length);
     setState(() {});
   }
 
@@ -272,7 +45,8 @@ class _BoardPageState extends State<BoardPage> {
             MediaQuery.sizeOf(context).height
         ? MediaQuery.sizeOf(context).height
         : MediaQuery.sizeOf(context).width * (3 / 5);
-    return Stack(
+    return Scaffold(
+        body: Stack(
       children: [
         Scaffold(
           floatingActionButton: Row(
@@ -283,18 +57,7 @@ class _BoardPageState extends State<BoardPage> {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: FloatingActionButton(
                   onPressed: () {
-                    _chessBoard = List<int>.filled(64, 0);
-                    _chessBoard[27] = 1;
-                    _chessBoard[28] = 2;
-                    _chessBoard[35] = 2;
-                    _chessBoard[36] = 1;
-                    var blackMovable =
-                        getMovableArray(Player.black.index, _chessBoard);
-                    for (var m in blackMovable) {
-                      _chessBoard[m.y * 8 + m.x] = 3;
-                    }
-                    _nowPlayer = Player.black.index;
-                    _time = 60;
+                    _nowIndex = 0;
                     setState(() {});
                   },
                   child: Icon(Icons.refresh),
@@ -329,46 +92,15 @@ class _BoardPageState extends State<BoardPage> {
                               padding: const EdgeInsets.all(20.0),
                               child: Board(
                                 nowPlayer: _nowPlayer,
-                                board: _chessBoard,
+                                board: _chessBoardOfInfo[_nowIndex],
                                 onPress: (int index) {
-                                  _clearFlippedState();
-                                  setState(() {});
-                                  if (_chessBoard[index] == 3) {
-                                    _moveChess(index);
-                                    setState(() {});
-                                  }
+                                  return;
                                 },
                                 onHover: (int index) {
-                                  _clearFlippedState();
-                                  setState(() {});
-                                  if (_chessBoard[index] == 3) {
-                                    Coordinates findPoint = Coordinates()
-                                      ..y = index ~/ 8
-                                      ..x = index % 8;
-
-                                    var tmp = List<int>.from(_chessBoard);
-                                    for (int i = 0; i < tmp.length; i++) {
-                                      if (tmp[i] == 3) {
-                                        tmp[i] = 0;
-                                      }
-                                      if (tmp[i] == 4) {
-                                        if (_nowPlayer == Player.black.index) {
-                                          tmp[i] = Player.white.index;
-                                        } else {
-                                          tmp[i] = Player.black.index;
-                                        }
-                                      }
-                                    }
-                                    var canFlipped = getAllCanFlipped(
-                                        _nowPlayer, tmp, findPoint);
-                                    for (var m in canFlipped) {
-                                      _chessBoard[m.y * 8 + m.x] = 4;
-                                    }
-                                    setState(() {});
-                                  }
+                                  return;
                                 },
                                 onHoverOut: (int index) {
-                                  _clearFlippedState();
+                                  return;
                                 },
                               ),
                             ),
@@ -422,7 +154,7 @@ class _BoardPageState extends State<BoardPage> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 5.0),
                                     child: Text(
-                                      "${_chessBoard.where((element) => element == Player.black.index || (Player.black.index != _nowPlayer && element == 4)).length}",
+                                      "${_chessBoardOfInfo[_nowIndex].where((element) => element == Player.black.index || (Player.black.index != _nowPlayer && element == 4)).length}",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -472,7 +204,7 @@ class _BoardPageState extends State<BoardPage> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 5.0),
                                     child: Text(
-                                      "${_chessBoard.where((element) => element == Player.white.index || (Player.white.index != _nowPlayer && element == 4)).length}",
+                                      "${_chessBoardOfInfo[_nowIndex].where((element) => element == Player.white.index || (Player.white.index != _nowPlayer && element == 4)).length}",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -487,32 +219,70 @@ class _BoardPageState extends State<BoardPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: AnimatedContainer(
-                            duration: Duration(milliseconds: 200),
+                          child: Container(
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                                color: Color(0xff3a4b3a),
-                                borderRadius: BorderRadius.circular(20)),
+                              color: Color(0xff3a4b3a),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(20.0),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.timer,
-                                    size: 30,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 5.0),
-                                    child: Text(
-                                      "${_time}",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
+                              child: DefaultTextStyle(
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20
+                                ),
+                                child: Row(
+                                  children: [
+                                    Spacer(),
+                                    InkWell(
+                                      onTap: () {
+                                        if (_nowIndex > 0) {
+                                          _nowIndex--;
+                                          _nowPlayer =
+                                              widget.info.player[_nowIndex];
+                                        }
+                                        setState(() {});
+                                      },
+                                      child: Center(
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.arrow_back_outlined,size: 35,),
+                                            Text("Back"),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Spacer(),
+                                    Container(
+                                      height: 30,
+                                      width: 2,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(100),
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    InkWell(
+                                      onTap: () {
+                                        if (_nowIndex + 1 < _chessBoardOfInfo.length) {
+                                          _nowIndex++;
+                                          _nowPlayer = widget.info.player[_nowIndex];
+                                        } else {
+                                          _isGameEnd = true;
+                                        }
+                                        setState(() {});
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.arrow_forward,size: 35,),
+                                          Text("Forward"),
+                                        ],
+                                      ),
+                                    ),
+                                    Spacer(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -584,7 +354,7 @@ class _BoardPageState extends State<BoardPage> {
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                            "* ${_chessBoard.where((element) => element == Player.black.index).length}",
+                                            "* ${_chessBoardOfInfo[_nowIndex].where((element) => element == Player.black.index).length}",
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
@@ -609,7 +379,7 @@ class _BoardPageState extends State<BoardPage> {
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                            "* ${_chessBoard.where((element) => element == Player.white.index).length}",
+                                            "* ${_chessBoardOfInfo[_nowIndex].where((element) => element == Player.white.index).length}",
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
@@ -635,12 +405,12 @@ class _BoardPageState extends State<BoardPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   spacing: 10,
                                   children: [
-                                    _chessBoard
+                                    _chessBoardOfInfo[_nowIndex]
                                                 .where((element) =>
                                                     element ==
                                                     Player.black.index)
                                                 .length !=
-                                            _chessBoard
+                                            _chessBoardOfInfo[_nowIndex]
                                                 .where((element) =>
                                                     element ==
                                                     Player.white.index)
@@ -649,13 +419,15 @@ class _BoardPageState extends State<BoardPage> {
                                             width: 40,
                                             height: 40,
                                             decoration: BoxDecoration(
-                                              color: _chessBoard
+                                              color: _chessBoardOfInfo[
+                                                              _nowIndex]
                                                           .where((element) =>
                                                               element ==
                                                               Player
                                                                   .black.index)
                                                           .length >
-                                                      _chessBoard
+                                                      _chessBoardOfInfo[
+                                                              _nowIndex]
                                                           .where((element) =>
                                                               element ==
                                                               Player
@@ -676,13 +448,15 @@ class _BoardPageState extends State<BoardPage> {
                                                 Colors.black,
                                                 Colors.white
                                               ]),
-                                              color: _chessBoard
+                                              color: _chessBoardOfInfo[
+                                                              _nowIndex]
                                                           .where((element) =>
                                                               element ==
                                                               Player
                                                                   .black.index)
                                                           .length >
-                                                      _chessBoard
+                                                      _chessBoardOfInfo[
+                                                              _nowIndex]
                                                           .where((element) =>
                                                               element ==
                                                               Player
@@ -734,31 +508,11 @@ class _BoardPageState extends State<BoardPage> {
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        _chessBoard = List<int>.filled(64, 0);
-                                        _chessBoard[27] = 1;
-                                        _chessBoard[28] = 2;
-                                        _chessBoard[35] = 2;
-                                        _chessBoard[36] = 1;
-                                        var blackMovable = getMovableArray(
-                                            Player.black.index, _chessBoard);
-                                        for (var m in blackMovable) {
-                                          _chessBoard[m.y * 8 + m.x] = 3;
-                                        }
-                                        _nowPlayer = Player.black.index;
+                                        _nowIndex = 0;
                                         _isGameEnd = false;
-                                        _time = 60;
-                                        _playerHistory.clear();
-                                        _chessBoardHistory.clear();
                                         setState(() {});
                                       },
                                       icon: Icon(Icons.refresh),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        DBHelper().save(
-                                            _playerHistory, _chessBoardHistory);
-                                      },
-                                      icon: Icon(Icons.save),
                                     ),
                                   ],
                                 ),
@@ -774,6 +528,6 @@ class _BoardPageState extends State<BoardPage> {
             ),
           )
       ],
-    );
+    ));
   }
 }

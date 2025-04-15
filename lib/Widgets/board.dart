@@ -76,6 +76,7 @@ class _BoardState extends State<Board> {
                       end: Alignment.bottomRight,
                     ),
                     border: Border.all(color: Colors.black, width: 0.75),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Image.asset(
                     'images/noisy.png',
@@ -88,7 +89,7 @@ class _BoardState extends State<Board> {
           Padding(
             padding: EdgeInsets.all(_padding),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
