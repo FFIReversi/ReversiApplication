@@ -46,6 +46,7 @@ class _NetworkPageState extends State<NetworkPage> {
       webSocket = await WebSocket.connect("ws://pal222.tplinkdns.com:8765/");
       roomID = _roomInputController.text;
       webSocket.add('{"room_id":"$roomID"}');
+      _isGameEnd = false;
       webSocket.listen((data) {
         print(data);
         var json = jsonDecode(data);
@@ -329,6 +330,7 @@ class _NetworkPageState extends State<NetworkPage> {
                     onPressed: () {
                       webSocket.close();
                       roomID = "";
+                      _isGameEnd = false;
                       setState(() {});
                     },
                     heroTag: null,
