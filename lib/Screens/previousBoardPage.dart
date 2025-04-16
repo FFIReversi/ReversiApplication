@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../Utils/game.dart';
 import '../Widgets/board.dart';
@@ -22,6 +24,9 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
   int _nowPlayer = Player.black.index;
   bool _isGameEnd = false;
   int _nowIndex = 0;
+  int _lastPosition = -1;
+  bool _isTimerStart = false;
+  Timer? _timer;
   late var _chessBoardOfInfo = widget.info.chessBoard.toList();
 
   @override
@@ -37,6 +42,40 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
     _chessBoardOfInfo.insert(0, _chessBoard);
     print(_chessBoardOfInfo.length);
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    if (_timer != null) _timer!.cancel();
+  }
+
+  void _timerToggle() {
+    if (_timer?.isActive ?? false) {
+      _timer!.cancel();
+      _isTimerStart = false;
+      setState(() {});
+      return;
+    }
+    _isTimerStart = true;
+    setState(() {});
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_nowIndex + 1 < _chessBoardOfInfo.length) {
+        var previousBoard = _chessBoardOfInfo[_nowIndex].toList();
+        _nowIndex++;
+        _nowPlayer = widget.info.player[_nowIndex];
+        for (int i = 0; i < _chessBoardOfInfo[_nowIndex].length; i++) {
+          if (previousBoard[i] == 0 && _chessBoardOfInfo[_nowIndex][i] != 0) {
+            _lastPosition = i;
+            setState(() {});
+          }
+        }
+      } else {
+        _isGameEnd = true;
+      }
+      setState(() {});
+    });
   }
 
   @override
@@ -58,6 +97,9 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                 child: FloatingActionButton(
                   onPressed: () {
                     _nowIndex = 0;
+                    _lastPosition = -1;
+                    if (_timer != null) _timer!.cancel();
+                    _isTimerStart = false;
                     setState(() {});
                   },
                   child: Icon(Icons.refresh),
@@ -92,6 +134,7 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                               padding: const EdgeInsets.all(20.0),
                               child: Board(
                                 nowPlayer: _nowPlayer,
+                                aiPosition: _lastPosition,
                                 board: _chessBoardOfInfo[_nowIndex],
                                 onPress: (int index) {
                                   return;
@@ -229,10 +272,9 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                               padding: const EdgeInsets.all(20.0),
                               child: DefaultTextStyle(
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20
-                                ),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17),
                                 child: Row(
                                   children: [
                                     Spacer(),
@@ -248,26 +290,49 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                                       child: Center(
                                         child: Row(
                                           children: [
-                                            Icon(Icons.arrow_back_outlined,size: 35,),
-                                            Text("Back"),
+                                            Icon(
+                                              Icons.arrow_back_outlined,
+                                              size: 25,
+                                            ),
+                                            Text("Backward"),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    Spacer(),
-                                    Container(
-                                      height: 30,
-                                      width: 2,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.withAlpha(100),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: Container(
+                                        height: 30,
+                                        width: 2,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(100),
+                                        ),
                                       ),
                                     ),
-                                    Spacer(),
                                     InkWell(
                                       onTap: () {
-                                        if (_nowIndex + 1 < _chessBoardOfInfo.length) {
+                                        if (_nowIndex + 1 <
+                                            _chessBoardOfInfo.length) {
+                                          var previousBoard =
+                                              _chessBoardOfInfo[_nowIndex]
+                                                  .toList();
                                           _nowIndex++;
-                                          _nowPlayer = widget.info.player[_nowIndex];
+                                          _nowPlayer =
+                                              widget.info.player[_nowIndex];
+                                          for (int i = 0;
+                                              i <
+                                                  _chessBoardOfInfo[_nowIndex]
+                                                      .length;
+                                              i++) {
+                                            if (previousBoard[i] == 0 &&
+                                                _chessBoardOfInfo[_nowIndex]
+                                                        [i] !=
+                                                    0) {
+                                              _lastPosition = i;
+                                              setState(() {});
+                                            }
+                                          }
                                         } else {
                                           _isGameEnd = true;
                                         }
@@ -275,13 +340,52 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                                       },
                                       child: Row(
                                         children: [
-                                          Icon(Icons.arrow_forward,size: 35,),
+                                          Icon(
+                                            Icons.arrow_forward,
+                                            size: 25,
+                                          ),
                                           Text("Forward"),
                                         ],
                                       ),
                                     ),
                                     Spacer(),
                                   ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Color(0xff3a4b3a),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: DefaultTextStyle(
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17),
+                                child: InkWell(
+                                  onTap: () {
+                                    _timerToggle();
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Symbols.robot_2_rounded),
+                                      Text("Auto Mode"),
+                                      Switch(
+                                          value: _isTimerStart,
+                                          onChanged: (value) {
+                                            _timerToggle();
+                                          })
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -510,6 +614,9 @@ class _PreviousBoardPageState extends State<PreviousBoardPage> {
                                       onPressed: () {
                                         _nowIndex = 0;
                                         _isGameEnd = false;
+                                        _lastPosition = -1;
+                                        if (_timer != null) _timer!.cancel();
+                                        _isTimerStart = false;
                                         setState(() {});
                                       },
                                       icon: Icon(Icons.refresh),

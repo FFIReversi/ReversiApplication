@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../Screens/boardPage.dart';
+
 class Board extends StatefulWidget {
   List<int> board;
   int nowPlayer;
+  int aiPosition;
 
   final void Function(int index) onPress;
   final void Function(int index) onHover;
@@ -12,6 +15,7 @@ class Board extends StatefulWidget {
       {super.key,
       required this.board,
       required this.nowPlayer,
+      required this.aiPosition,
       required this.onPress,
       required this.onHover,
       required this.onHoverOut});
@@ -20,8 +24,10 @@ class Board extends StatefulWidget {
   State<Board> createState() => _BoardState();
 }
 
-class _BoardState extends State<Board> {
+class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   List<double> _scaleList = List<double>.filled(64, 1);
+  late AnimationController _controller;
+  late Animation<double> _paddingAnimation;
   static const List<Color> _chessColor = [
     Colors.transparent,
     Colors.black,
@@ -33,6 +39,28 @@ class _BoardState extends State<Board> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+      reverseDuration: Duration(microseconds: 800),
+    )..repeat(reverse: true);
+
+    _paddingAnimation = Tween<double>(
+      begin: 0,
+      end: 6,
+    ).animate(_controller);
+
+    _controller.addListener(() {
+      setState(() {});
+    });
+    // _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,6 +125,7 @@ class _BoardState extends State<Board> {
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 8,
@@ -138,66 +167,86 @@ class _BoardState extends State<Board> {
                               scale: _scaleList[index],
                               child: Padding(
                                 padding: _board[index] == 3
-                                    ? const EdgeInsets.all(22)
-                                    : const EdgeInsets.all(6),
-                                child: _board[index] != 4
-                                    ? Container(
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(360),
-                                          color: _chessColor[_board[index]],
-                                          boxShadow: [
-                                            if (_board[index] != 0)
-                                              BoxShadow(
-                                                color:
-                                                    Colors.black.withAlpha(150),
-                                                spreadRadius: 2,
-                                                blurRadius: 5,
-                                                offset: Offset(3, 3),
-                                              ),
-                                          ],
-                                        ),
-                                      )
-                                    : Stack(
-                                        children: [
-                                          Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(360),
-                                              color: _chessColor[
-                                                  widget.nowPlayer == 1
-                                                      ? 2
-                                                      : 1],
-                                              boxShadow: [
-                                                if (_board[index] != 0)
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withAlpha(150),
-                                                    spreadRadius: 2,
-                                                    blurRadius: 5,
-                                                    offset: Offset(3, 3),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(15.0),
+                                    ? const EdgeInsets.all(23)
+                                    : const EdgeInsets.all(7),
+                                child: Stack(
+                                  children: [
+                                    index == widget.aiPosition
+                                        ? Center(
                                             child: Container(
-                                              width: double.infinity,
-                                              height: double.infinity,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          365),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.amber
+                                                          .withAlpha((100 *
+                                                                      _paddingAnimation
+                                                                          .value /
+                                                                      6)
+                                                                  .ceil() +
+                                                              50),
+                                                      // ,
+                                                      spreadRadius:
+                                                          _paddingAnimation
+                                                              .value,
+                                                      blurRadius: 3,
+                                                      offset: Offset(0, 0),
+                                                    )
+                                                  ],
+                                                  color: Colors.transparent,
+                                                )),
+                                          )
+                                        : SizedBox(),
+                                    Container(
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(360),
+                                        color: _chessColor[_board[index] == 4
+                                            ? widget.nowPlayer ==
+                                                    Player.white.index
+                                                ? Player.black.index
+                                                : Player.white.index
+                                            : _board[index]],
+                                        boxShadow: [
+                                          if (_board[index] != 0)
+                                            BoxShadow(
+                                              color: Colors.black.withAlpha((150 -
+                                                      (index ==
+                                                              widget.aiPosition
+                                                          ? 150 *
+                                                              (_paddingAnimation
+                                                                      .value /
+                                                                  6)
+                                                          : 1))
+                                                  .ceil()),
+                                              spreadRadius: 2,
+                                              blurRadius: 5,
+                                              offset: Offset(3, 3),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    _board[index] == 4
+                                        ? Center(
+                                            child: Container(
+                                              width: 10,
+                                              height: 10,
                                               decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(360),
                                                 color: Colors.red,
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

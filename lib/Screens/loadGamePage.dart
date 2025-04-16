@@ -24,28 +24,25 @@ class _LoadGamePageState extends State<LoadGamePage> {
   }
 
   void _loadGames() async {
-    if(previousGames.isNotEmpty){
+    if (previousGames.isNotEmpty) {
       previousGames.clear();
     }
     previousGames = await DBHelper().getAll();
-    for(var i in previousGames){
+    for (var i in previousGames) {
       print(i.id);
     }
     setState(() {});
   }
 
-  PageRouteBuilder _changePageRoute(Widget newPage){
+  PageRouteBuilder _changePageRoute(Widget newPage) {
     int animationDuration = 150;
     return PageRouteBuilder(
-        pageBuilder: (BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation) =>
-        newPage,
+        pageBuilder: (BuildContext context, Animation<double> animation,
+                Animation<double> secondaryAnimation) =>
+            newPage,
         transitionDuration: Duration(milliseconds: animationDuration),
-        reverseTransitionDuration:
-        Duration(milliseconds: 200),
-        transitionsBuilder: (context, animation,
-            secondaryAnimation, child) {
+        reverseTransitionDuration: Duration(milliseconds: 200),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0); // 從右進來
           const end = Offset.zero;
           final tween = Tween(begin: begin, end: end)
@@ -60,9 +57,9 @@ class _LoadGamePageState extends State<LoadGamePage> {
               child: child,
             ),
           );
-        }
-    );
+        });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +72,7 @@ class _LoadGamePageState extends State<LoadGamePage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(30.0),
         child: SingleChildScrollView(
           child: SizedBox(
             width: double.infinity,
@@ -123,31 +120,36 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                     ),
                                     Spacer(),
                                     Text(
-                                        "${dateTime.hour}:${dateTime.minute}:${dateTime.second}.${dateTime.millisecond}",
+                                      "${dateTime.hour}:${dateTime.minute}:${dateTime.second}.${dateTime.millisecond}",
                                     )
                                   ],
                                 ),
                                 Row(
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(vertical:  8.0),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         spacing: 15,
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: [
                                               Container(
                                                 width: 30,
                                                 height: 30,
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(360),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
                                                   color: Colors.black,
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color:
-                                                      Colors.black.withAlpha(150),
+                                                      color: Colors.black
+                                                          .withAlpha(150),
                                                       spreadRadius: 2,
                                                       blurRadius: 5,
                                                       offset: Offset(3, 3),
@@ -156,8 +158,9 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 5.0),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0),
                                                 child: Text(
                                                   "${e.chessBoard.last.where((element) => element == Player.black.index).length}",
                                                   style: TextStyle(
@@ -170,18 +173,21 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                             ],
                                           ),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: [
                                               Container(
                                                 width: 30,
                                                 height: 30,
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(360),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
                                                   color: Colors.white,
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color:
-                                                      Colors.black.withAlpha(150),
+                                                      color: Colors.black
+                                                          .withAlpha(150),
                                                       spreadRadius: 2,
                                                       blurRadius: 5,
                                                       offset: Offset(3, 3),
@@ -190,8 +196,9 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 5.0),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5.0),
                                                 child: Text(
                                                   "${e.chessBoard.last.where((element) => element == Player.white.index).length}",
                                                   style: TextStyle(
@@ -209,15 +216,31 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                     Spacer(),
                                     Column(
                                       children: [
-                                        IconButton(onPressed: (){
-                                          Navigator.push(context, _changePageRoute(PreviousBoardPage(info: e)));
-                                        }, icon: Icon(Icons.arrow_circle_right_outlined,size: 30,),),
-                                        IconButton(onPressed: ()async{
-                                          var box = Hive.box("Reversi");
-                                          box.delete(e.id);
-                                          _loadGames();
-                                          setState(() {});
-                                        }, icon: Icon(Icons.delete_outline,size: 30,),),
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                _changePageRoute(
+                                                    PreviousBoardPage(
+                                                        info: e)));
+                                          },
+                                          icon: Icon(
+                                            Icons.arrow_circle_right_outlined,
+                                            size: 30,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            var box = Hive.box("Reversi");
+                                            box.delete(e.id);
+                                            _loadGames();
+                                            setState(() {});
+                                          },
+                                          icon: Icon(
+                                            Icons.delete_outline,
+                                            size: 30,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],

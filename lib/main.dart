@@ -1,10 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // Import for debugPrintSizesEnabled
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:reversi_application/Utils/database.dart';
 import 'package:reversi_application/Utils/game.dart';
 import 'package:window_manager/window_manager.dart';
 

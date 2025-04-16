@@ -25,6 +25,9 @@ class _BoardPageState extends State<BoardPage> {
   int _time = 60;
   List<List<int>> _chessBoardHistory = [];
   List<int> _playerHistory = [];
+  int _aiPosition = -1;
+
+  late Timer timer;
 
   void _gameEnd() {
     _playerHistory.add(_nowPlayer);
@@ -41,12 +44,7 @@ class _BoardPageState extends State<BoardPage> {
   }
 
   void _saveGame() {
-    _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
-    _switchPlayer();
+    _clearFlippedState(true);
 
     bool have = false;
     for (int i = 0; i < _chessBoardHistory.length; i++) {
@@ -72,8 +70,11 @@ class _BoardPageState extends State<BoardPage> {
     }
   }
 
-  void _clearFlippedState() {
+  void _clearFlippedState(bool clean3) {
     for (int i = 0; i < _chessBoard.length; i++) {
+      if (clean3) {
+        if (_chessBoard[i] == 3) _chessBoard[i] = 0;
+      }
       if (_chessBoard[i] == 4) {
         if (_nowPlayer == Player.black.index) {
           _chessBoard[i] = Player.white.index;
@@ -85,12 +86,43 @@ class _BoardPageState extends State<BoardPage> {
     setState(() {});
   }
 
+  void _ai(bool needHandle) {
+    _aiPosition = -1;
+    setState(() {});
+    timer = Timer(const Duration(milliseconds: 700), () {
+      var previousBoard = _chessBoard.toList();
+      bool _isSameList = true;
+      if (gameMode == 1) {
+        _isSameList =
+            _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
+        _chessBoard = aiRandom(_nowPlayer, _chessBoard);
+      } else if (gameMode == 2) {
+        _isSameList =
+            _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
+        _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
+      } else if (gameMode == 3) {
+        _isSameList = _listEquals(
+            aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
+        _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
+      }
+      for (int i = 0; i < _chessBoard.length; i++) {
+        if (previousBoard[i] == 0 && _chessBoard[i] != 0) {
+          _aiPosition = i;
+          setState(() {});
+        }
+      }
+      if (!_isSameList) {
+        _saveGame();
+      }
+      if (needHandle) {
+        _handleGameAfterAI();
+      }
+    });
+  }
+
   void _handleGameAfterAI() {
+    _clearFlippedState(true);
     _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
 
     var movable = getMovableArray(_nowPlayer, _chessBoard);
     if (movable.isEmpty) {
@@ -100,28 +132,8 @@ class _BoardPageState extends State<BoardPage> {
         _gameEnd();
         return;
       }
-      bool _isSameList = true;
-      if (gameMode == 1) {
-        _isSameList =
-            _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
-      } else if (gameMode == 2) {
-        _isSameList =
-            _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
-      } else if (gameMode == 3) {
-        _isSameList = _listEquals(
-            aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-        _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-        if (!_isSameList) {
-          _saveGame();
-        }
+      if (gameMode >= 1 && gameMode <= 3) {
+        _ai(false);
       } else {
         for (var m in movable) {
           _chessBoard[m.y * 8 + m.x] = 3;
@@ -143,39 +155,13 @@ class _BoardPageState extends State<BoardPage> {
       ..y = chessPosition ~/ 8
       ..x = chessPosition % 8;
 
-    _switchPlayer();
-    for (int i = 0; i < _chessBoard.length; i++) {
-      if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-      if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
-    }
-
-    _switchPlayer();
+    _clearFlippedState(true);
     _chessBoard = makeMove(_nowPlayer, _chessBoard, dropPoint);
     _saveGame();
     _switchPlayer();
-    bool _isSameList = true;
-    if (gameMode == 1) {
-      _isSameList = _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
-    } else if (gameMode == 2) {
-      _isSameList = _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
-    } else if (gameMode == 3) {
-      _isSameList =
-          _listEquals(aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-      _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-      if (!_isSameList) {
-        _saveGame();
-      }
-      _handleGameAfterAI();
+    if (gameMode >= 1 && gameMode <= 3) {
+      _ai(true);
+      // _handleGameAfterAI();
     } else {
       var movable = getMovableArray(_nowPlayer, _chessBoard);
       for (var m in movable) {
@@ -210,60 +196,48 @@ class _BoardPageState extends State<BoardPage> {
     }
     _playerHistory.clear();
     _chessBoardHistory.clear();
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       if (!mounted || _isGameEnd) return;
-      return setState(() {
-        _time--;
-        setState(() {});
-        if (_time <= 0) {
-          _switchPlayer();
-          for (int i = 0; i < _chessBoard.length; i++) {
-            if (_chessBoard[i] == 3) _chessBoard[i] = 0;
-            if (_chessBoard[i] == 4) _chessBoard[i] = _nowPlayer;
+      _time--;
+      setState(() {});
+      if (_time <= 0) {
+        _clearFlippedState(true);
+        bool _isSameList = true;
+
+        var previousBoard = _chessBoard.toList();
+        _isSameList =
+            _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
+        _chessBoard = aiRandom(_nowPlayer, _chessBoard);
+
+        for (int i = 0; i < _chessBoard.length; i++) {
+          if (previousBoard[i] == 0 && _chessBoard[i] != 0) {
+            _aiPosition = i;
+            setState(() {});
           }
-          _switchPlayer();
-          bool _isSameList = true;
-          _isSameList =
-              _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-          _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-          if (!_isSameList) {
-            _saveGame();
-          }
-          _switchPlayer();
-          if (gameMode == 1) {
-            _isSameList =
-                _listEquals(aiRandom(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiRandom(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else if (gameMode == 2) {
-            _isSameList =
-                _listEquals(aiGreedy(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiGreedy(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else if (gameMode == 3) {
-            _isSameList = _listEquals(
-                aiGreedyAlphaBeta(_nowPlayer, _chessBoard), _chessBoard);
-            _chessBoard = aiGreedyAlphaBeta(_nowPlayer, _chessBoard);
-            if (!_isSameList) {
-              _saveGame();
-            }
-            _handleGameAfterAI();
-          } else {
-            _switchPlayer();
-            _handleGameAfterAI();
-          }
-          setState(() {});
-          _time = 60;
         }
-      });
+        if (!_isSameList) {
+          _saveGame();
+        }
+        _switchPlayer();
+        if (gameMode >= 1 && gameMode <= 3) {
+          _ai(true);
+          // _handleGameAfterAI();
+        } else {
+          _switchPlayer();
+          _handleGameAfterAI();
+        }
+        setState(() {});
+        _time = 60;
+      }
     });
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    if (timer.isActive) timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -294,6 +268,7 @@ class _BoardPageState extends State<BoardPage> {
                       _chessBoard[m.y * 8 + m.x] = 3;
                     }
                     _nowPlayer = Player.black.index;
+                    _aiPosition = -1;
                     _time = 60;
                     setState(() {});
                   },
@@ -329,9 +304,10 @@ class _BoardPageState extends State<BoardPage> {
                               padding: const EdgeInsets.all(20.0),
                               child: Board(
                                 nowPlayer: _nowPlayer,
+                                aiPosition: _aiPosition,
                                 board: _chessBoard,
                                 onPress: (int index) {
-                                  _clearFlippedState();
+                                  _clearFlippedState(false);
                                   setState(() {});
                                   if (_chessBoard[index] == 3) {
                                     _moveChess(index);
@@ -339,7 +315,7 @@ class _BoardPageState extends State<BoardPage> {
                                   }
                                 },
                                 onHover: (int index) {
-                                  _clearFlippedState();
+                                  _clearFlippedState(false);
                                   setState(() {});
                                   if (_chessBoard[index] == 3) {
                                     Coordinates findPoint = Coordinates()
@@ -368,7 +344,7 @@ class _BoardPageState extends State<BoardPage> {
                                   }
                                 },
                                 onHoverOut: (int index) {
-                                  _clearFlippedState();
+                                  _clearFlippedState(false);
                                 },
                               ),
                             ),
@@ -749,6 +725,7 @@ class _BoardPageState extends State<BoardPage> {
                                         _time = 60;
                                         _playerHistory.clear();
                                         _chessBoardHistory.clear();
+                                        _aiPosition = -1;
                                         setState(() {});
                                       },
                                       icon: Icon(Icons.refresh),
