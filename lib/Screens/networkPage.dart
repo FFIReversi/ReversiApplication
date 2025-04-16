@@ -123,7 +123,6 @@ class _NetworkPageState extends State<NetworkPage> {
         chessBoard.add(element);
       }
       _chessBoard = chessBoard;
-      _saveGame();
       if (!data["DoNotMove"]) {
         _nowPlayer = _player;
       }
@@ -157,26 +156,6 @@ class _NetworkPageState extends State<NetworkPage> {
     return true;
   }
 
-  void _saveGame() {
-    _clearFlippedState(true);
-
-    bool have = false;
-    for (int i = 0; i < _chessBoardHistory.length; i++) {
-      if (_listEquals(_chessBoardHistory[i], _playerHistory)) have = false;
-    }
-
-    if (!have) {
-      print(_chessBoardHistory.where((e) {
-        return e != 0;
-      }).length);
-      if (_isWebSocketConnected) {
-        _playerHistory.add(_nowPlayer);
-      }
-      _chessBoardHistory.add(_chessBoard.toList());
-      // print(_nowPlayer);
-    }
-  }
-
   void _gameEnd() {
     _playerHistory.add(_nowPlayer);
     _isGameEnd = true;
@@ -190,7 +169,6 @@ class _NetworkPageState extends State<NetworkPage> {
 
     _clearFlippedState(true);
     _chessBoard = makeMove(_player, _chessBoard, dropPoint);
-    _saveGame();
     _switchPlayer();
 
     var movable = getMovableArray(_nowPlayer, _chessBoard);
@@ -842,14 +820,6 @@ class _NetworkPageState extends State<NetworkPage> {
                                           webSocket.close();
                                         },
                                         icon: Icon(Icons.arrow_back),
-                                      ),
-                                      IconButton(
-                                        onPressed: () {
-                                          // _isGameEnd = false;
-                                          // _lastPosition = -1;
-                                          // setState(() {});
-                                        },
-                                        icon: Icon(Icons.save),
                                       ),
                                     ],
                                   ),
