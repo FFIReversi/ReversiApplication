@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:reversi_application/Screens/loadGamePage.dart';
+import 'package:reversi_application/Screens/networkPage.dart';
 
 import 'boardPage.dart';
 
@@ -13,19 +14,15 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-
-  PageRouteBuilder _changePageRoute(Widget newPage){
+  PageRouteBuilder _changePageRoute(Widget newPage) {
     int animationDuration = 150;
     return PageRouteBuilder(
-        pageBuilder: (BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation) =>
+        pageBuilder: (BuildContext context, Animation<double> animation,
+                Animation<double> secondaryAnimation) =>
             newPage,
         transitionDuration: Duration(milliseconds: animationDuration),
-        reverseTransitionDuration:
-        Duration(milliseconds: 200),
-        transitionsBuilder: (context, animation,
-            secondaryAnimation, child) {
+        reverseTransitionDuration: Duration(milliseconds: 200),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0); // 從右進來
           const end = Offset.zero;
           final tween = Tween(begin: begin, end: end)
@@ -40,8 +37,7 @@ class _HomepageState extends State<Homepage> {
               child: child,
             ),
           );
-        }
-    );
+        });
   }
 
   @override
@@ -90,10 +86,8 @@ class _HomepageState extends State<Homepage> {
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to the game page
-                          Navigator.push(
-                            context,
-                            _changePageRoute(BoardPage(gameMode: 0))
-                          );
+                          Navigator.push(context,
+                              _changePageRoute(BoardPage(gameMode: 0)));
                         },
                         child: const Text('Start Game (Player vs Player)'),
                       ),
@@ -101,10 +95,8 @@ class _HomepageState extends State<Homepage> {
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to the game page
-                          Navigator.push(
-                              context,
-                              _changePageRoute(BoardPage(gameMode: 1))
-                          );
+                          Navigator.push(context,
+                              _changePageRoute(BoardPage(gameMode: 1)));
                         },
                         child: const Text('Start Game (Player vs AI level 1)'),
                       ),
@@ -112,10 +104,8 @@ class _HomepageState extends State<Homepage> {
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to the game page
-                          Navigator.push(
-                              context,
-                              _changePageRoute(BoardPage(gameMode: 2))
-                          );
+                          Navigator.push(context,
+                              _changePageRoute(BoardPage(gameMode: 2)));
                         },
                         child: const Text('Start Game (Player vs AI level 2)'),
                       ),
@@ -123,10 +113,8 @@ class _HomepageState extends State<Homepage> {
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to the game page
-                          Navigator.push(
-                              context,
-                              _changePageRoute(BoardPage(gameMode: 3))
-                          );
+                          Navigator.push(context,
+                              _changePageRoute(BoardPage(gameMode: 3)));
                         },
                         child: const Text('Start Game (Player vs AI level 3'),
                       ),
@@ -135,9 +123,16 @@ class _HomepageState extends State<Homepage> {
                         onPressed: () {
                           // Navigate to the game page
                           Navigator.push(
-                              context,
-                              _changePageRoute(LoadGamePage())
-                          );
+                              context, _changePageRoute(NetworkPage()));
+                        },
+                        child: const Text('Online mode'),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Navigate to the game page
+                          Navigator.push(
+                              context, _changePageRoute(LoadGamePage()));
                         },
                         child: const Text('Previous Games'),
                       ),

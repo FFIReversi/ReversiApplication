@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart'; // Import for debugPrintSizesEnabled
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:reversi_application/Utils/game.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'Screens/homePage.dart';
+import 'Utils/database.dart';
 
 void main() async {
   if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
@@ -26,9 +25,7 @@ void main() async {
       await windowManager.focus();
     });
   }
-  await Hive.initFlutter();
-  Hive.registerAdapter(GameAdapter());
-  await Hive.openBox("Reversi");
+  DBHelper.setup();
   runApp(MyApp());
 }
 
@@ -45,6 +42,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: true,
       theme: ThemeData(
+        useMaterial3: true,
         brightness: Brightness.dark,
         primaryColor: Color(0xff004118),
       ),

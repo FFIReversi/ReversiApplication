@@ -32,6 +32,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     Colors.transparent,
     Colors.black,
     Colors.white,
+    Color(0x4F000000),
     Color(0xC0FFFFFF)
   ];
 
@@ -212,7 +213,9 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                                                     Player.white.index
                                                 ? Player.black.index
                                                 : Player.white.index
-                                            : _board[index]],
+                                            : _board[index] == 3
+                                                ? widget.nowPlayer + 2
+                                                : _board[index]],
                                         boxShadow: [
                                           if (_board[index] != 0)
                                             BoxShadow(

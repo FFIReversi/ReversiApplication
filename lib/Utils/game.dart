@@ -1,22 +1,28 @@
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 
 part 'game.g.dart';
 
-@HiveType(typeId: 0)
-class Game extends HiveObject{
-  @HiveField(0)
+@collection
+@Name("Game")
+class Game {
+  @Name("dateTime")
   String dateTime;
-  @HiveField(1)
+  @Name("player")
   List<int> player;
-  @HiveField(2)
-  List<List<int>> chessBoard;
+  @Name("chessBoardJson")
+  String chessBoardJson = "";
 
-  int id = 0;
+  @ignore
+  List<List<int>> chessBoard = List.empty(growable: true);
+  Id id = Isar.autoIncrement;
 
   Game({
-    this.id = 0 ,
+    this.id = Isar.autoIncrement,
+    List<List<int>>? chessBoard,
+    this.chessBoardJson = "",
     required this.dateTime,
     required this.player,
-    required this.chessBoard,
-  });
+  }) {
+    this.chessBoard = chessBoard ?? [];
+  }
 }

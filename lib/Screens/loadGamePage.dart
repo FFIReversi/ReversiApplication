@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:reversi_application/Screens/previousBoardPage.dart';
 
 import '../Utils/database.dart';
@@ -231,8 +230,9 @@ class _LoadGamePageState extends State<LoadGamePage> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
-                                            var box = Hive.box("Reversi");
-                                            box.delete(e.id);
+                                            await DBHelper.isar.writeTxn(() =>
+                                                DBHelper.isar.games
+                                                    .delete(e.id));
                                             _loadGames();
                                             setState(() {});
                                           },
