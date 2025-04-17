@@ -190,7 +190,7 @@ class _NetworkPageState extends State<NetworkPage> {
         webSocket.add(jsonEncode({
           "room_id": roomID,
           "Board": _chessBoard,
-          "IsEnd": true,
+          "IsEnd": false,
           "DoNotMove": true,
         }));
         for (var m in movable) {
