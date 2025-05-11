@@ -43,7 +43,7 @@ class _NetworkPageState extends State<NetworkPage> {
 
   void _joinRoom() async {
     try {
-      webSocket = await WebSocket.connect("ws://pal222.tplinkdns.com:8765/");
+      webSocket = await WebSocket.connect("ws://reversi.skailine.net/");
       roomID = _roomInputController.text;
       webSocket.add('{"room_id":"$roomID"}');
       _isGameEnd = false;
