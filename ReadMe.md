@@ -1,6 +1,7 @@
 # Reversi
----
-[Demo影片](https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa)
+
+[Demo影片](https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa)\
+\
 [連線Demo影片](https://www.youtube.com/embed/ZKSD3ewFwKM?si=JzZz08gJUkfuE3fk)
 ---
 ## Tech Stack
