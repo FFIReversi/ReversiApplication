@@ -1,8 +1,3 @@
----
-title: ReadMe
-
----
-
 # Reversi
 
 ## Tech Stack
@@ -122,14 +117,5 @@ python3 OnlineGameRoomManager.py
 - 滑鼠Hover時並滑過棋子時，該棋子有放大縮小動畫
 
 ----
-
-<div style="display: flex; gap: 16px;">
-  <div>
-    <h3>Demo影片</h3>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-  </div>
-  <div>
-    <h3>連線 Demo</h3>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/ZKSD3ewFwKM?si=JzZz08gJUkfuE3fk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-  </div>
-</div>
+[Demo影片](https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa)
+[連線Demo影片](https://www.youtube.com/embed/ZKSD3ewFwKM?si=JzZz08gJUkfuE3fk)
