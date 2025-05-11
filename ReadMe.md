@@ -1,5 +1,8 @@
 # Reversi
-
+---
+[Demo影片](https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa)
+[連線Demo影片](https://www.youtube.com/embed/ZKSD3ewFwKM?si=JzZz08gJUkfuE3fk)
+---
 ## Tech Stack
 - 遊戲邏輯: C++
 - UI: [Flutter](https://flutter.dev/)
@@ -115,7 +118,3 @@ python3 OnlineGameRoomManager.py
 - 玩家切換，黃色邊框會淡入淡出
 - AI落子/回放有黃色呼吸燈效果
 - 滑鼠Hover時並滑過棋子時，該棋子有放大縮小動畫
-
-----
-[Demo影片](https://www.youtube.com/embed/FgX16MRQ7Zs?si=RAiHVdWEfGfQ6wVa)
-[連線Demo影片](https://www.youtube.com/embed/ZKSD3ewFwKM?si=JzZz08gJUkfuE3fk)
